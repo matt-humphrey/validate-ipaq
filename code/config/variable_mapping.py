@@ -1,0 +1,11 @@
+VAR_RENAME_MAP = {
+    "G220": {
+        "G220_MOD_MET": "G220_IPAQ_MOD_MET", 
+        "G220_MOD_MINS": "G220_IPAQ_MOD_MINS", 
+        "G220_VIG_MET": "G220_IPAQ_VIG_MET", 
+        "G220_VIG_MINS": "G220_IPAQ_VIG_MINS", 
+        "G220_WALK_MET": "G220_IPAQ_WALK_MET", 
+        "G220_WALK_MINS": "G220_IPAQ_WALK_MINS", 
+        "G220_TOT_MET": "G220_IPAQ_TOT_MET"
+    }
+}
