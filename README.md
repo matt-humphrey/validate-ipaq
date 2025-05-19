@@ -16,7 +16,8 @@ Play around with both Pointblank and Pandera to see which tool is better for bot
 - [ ] Remove unnecessary derived variables like "G220_SIT_WD_TRUNC"
 - [ ] Remove any comment variables like "G220_IPAQ_SIT_COM"
 - [ ] Run tests to verify (examples given for vigorous, but also apply to moderate and walking):
-  - [ ] If VIG_W is None, all subsequent VIG variables are 0
+  - [ ] If VIG_W is None, all subsequent VIG variables are None
+    - If VIG_W is 0 or 1, VIG_MINS and VIG_MET should be >= 0 and not None
   - [ ] VIG_MINS = VIG_HPD * 60 + VIG_MPD (maxed out at 180 mins)
   - [ ] VIG_MET = VIG_MINS * 8 (different factors for intensity - 8 for vig, 4 for mod, 3.3 for walk)
   - [ ] TOT_MET = VIG_MET + MOD_MET + WALK_MET
