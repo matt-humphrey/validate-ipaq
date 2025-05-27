@@ -1,6 +1,6 @@
 from pathlib import Path
 
-HOME = Path(__file__).parents[2]
+HOME = Path(__file__).parents[3]
 
 DATA = HOME / 'data'
 OG_DATA = DATA / 'original'

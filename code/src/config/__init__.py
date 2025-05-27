@@ -1,0 +1,1 @@
+from config.paths import HOME, RAW_DATA, INTERIM_DATA, PROCESSED_DATA

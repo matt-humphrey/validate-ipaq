@@ -1,0 +1,10 @@
+[project]
+name = "validate-ipaq"
+version = "0.0.1"
+description = "Validating and updating IPAQ data for the Raine Study."
+readme = "README.md"
+requires-python = ">=3.10"
+
+[build-system]
+requires = ["setuptools", "wheel"]
+build-backend = "setuptools.build_meta"

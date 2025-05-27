@@ -5,7 +5,11 @@
 annotated-types==0.7.0
     # via pydantic
 asttokens==3.0.0
-    # via stack-data
+    # via
+    #   nbdev
+    #   stack-data
+astunparse==1.6.3
+    # via nbdev
 babel==2.17.0
     # via great-tables
 certifi==2025.4.26
@@ -24,6 +28,8 @@ debugpy==1.8.13
     # via ipykernel
 decorator==5.2.1
     # via ipython
+execnb==0.1.14
+    # via nbdev
 executing==2.2.0
     # via stack-data
 faicons==0.2.2
@@ -31,7 +37,12 @@ faicons==0.2.2
 fastcore==1.8.0
     # via
     #   -r requirements.in
+    #   execnb
+    #   ghapi
+    #   nbdev
     #   odyssey
+ghapi==1.0.6
+    # via nbdev
 great-tables==0.17.0
     # via pointblank
 htmltools==0.6.0
@@ -51,6 +62,7 @@ ipykernel==6.29.5
 ipython==9.0.1
     # via
     #   -r requirements.in
+    #   execnb
     #   ipykernel
 ipython-pygments-lexers==1.1.1
     # via ipython
@@ -74,6 +86,8 @@ mypy-extensions==1.0.0
     # via typing-inspect
 narwhals==1.37.0
     # via pointblank
+nbdev==2.4.2
+    # via odyssey
 nest-asyncio==1.6.0
     # via ipykernel
 numpy==2.2.4
@@ -84,8 +98,10 @@ numpy==2.2.4
 packaging==24.2
     # via
     #   fastcore
+    #   ghapi
     #   htmltools
     #   ipykernel
+    #   nbdev
     #   pandera
 pandas==2.2.3
     # via
@@ -97,7 +113,7 @@ parso==0.8.4
     # via jedi
 platformdirs==4.3.7
     # via jupyter-core
-pointblank==0.9.0
+pointblank==0.9.6
     # via -r requirements.in
 polars==1.24.0
     # via
@@ -134,6 +150,8 @@ pytz==2025.1
     # via pandas
 pywin32==310
     # via jupyter-core
+pyyaml==6.0.2
+    # via nbdev
 pyzmq==26.3.0
     # via
     #   ipykernel
@@ -148,8 +166,12 @@ rich==13.9.4
     # via
     #   -r requirements.in
     #   odyssey
+setuptools==80.9.0
+    # via nbdev
 six==1.17.0
-    # via python-dateutil
+    # via
+    #   astunparse
+    #   python-dateutil
 stack-data==0.6.3
     # via ipython
 tornado==6.4.2
@@ -181,7 +203,11 @@ tzdata==2025.1
     # via pandas
 urllib3==2.4.0
     # via requests
+watchdog==6.0.0
+    # via nbdev
 wcwidth==0.2.13
     # via prompt-toolkit
+wheel==0.45.1
+    # via astunparse
 zipp==3.21.0
     # via importlib-metadata
