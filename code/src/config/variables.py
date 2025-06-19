@@ -120,7 +120,10 @@ DATASETS = {
             "G222_WALK_MET":     "G222_IPAQ_WALK_MET",
             "G222_TOT_MET":      "G222_IPAQ_TOT_MET"
         },
-        "delete": []
+        "delete": [
+            "G222_IPAQ_VIG_UNK", "G222_IPAQ_MOD_UNK", "G222_IPAQ_WALK_UNK",
+            "G222_IPAQ_SIT_WD_UNK", "G222_IPAQ_SIT_WE_UNK"
+        ]
     },
     "G227": {
         "file": "G227_Q.sav",
