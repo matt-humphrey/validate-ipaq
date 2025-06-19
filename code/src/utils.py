@@ -153,27 +153,35 @@ def validate_ipaq(
             left=1,
             right=7,
             segments=(f"{prefix}_IPAQ_VIG_W", 1),
+            na_pass=True
         )
         .col_vals_between(
             columns=f"{prefix}_IPAQ_VIG_HPD", 
             left=0,
             right=18, # unrealistic to do more than 18 hours of exercise per day (even that is a stretch!!)
             segments=(f"{prefix}_IPAQ_VIG_W", 1),
+            na_pass=True
         )
         .col_vals_between(
             columns=f"{prefix}_IPAQ_VIG_MPD", 
             left=0,
             right=59,
             segments=(f"{prefix}_IPAQ_VIG_W", 1),
+            na_pass=True
         )
         .col_vals_between(
             columns=f"{prefix}_IPAQ_VIG_MINS", 
             left=0,
             right=180, # total mins per category is capped at 180 mins
             segments=(f"{prefix}_IPAQ_VIG_W", 1),
+            na_pass=True
+        )
+        .col_vals_null(
+            columns=[f"{prefix}_IPAQ_VIG_D", f"{prefix}_IPAQ_VIG_HPD", f"{prefix}_IPAQ_VIG_MPD"], 
+            segments=(f"{prefix}_IPAQ_VIG_W", 0)
         )
         .col_vals_eq(
-            columns=[f"{prefix}_IPAQ_VIG_D", f"{prefix}_IPAQ_VIG_HPD", f"{prefix}_IPAQ_VIG_MPD", f"{prefix}_IPAQ_VIG_MINS", f"{prefix}_IPAQ_VIG_MET"], 
+            columns=[f"{prefix}_IPAQ_VIG_MINS", f"{prefix}_IPAQ_VIG_MET"], 
             value=0,
             segments=(f"{prefix}_IPAQ_VIG_W", 0)
         )
@@ -187,27 +195,35 @@ def validate_ipaq(
             left=1,
             right=7,
             segments=(f"{prefix}_IPAQ_MOD_W", 1),
+            na_pass=True
         )
         .col_vals_between(
             columns=f"{prefix}_IPAQ_MOD_HPD", 
             left=0,
             right=18, # unrealistic to do more than 18 hours of exercise per day (even that is a stretch!!)
             segments=(f"{prefix}_IPAQ_MOD_W", 1),
+            na_pass=True
         )
         .col_vals_between(
             columns=f"{prefix}_IPAQ_MOD_MPD", 
             left=0,
             right=59,
             segments=(f"{prefix}_IPAQ_MOD_W", 1),
+            na_pass=True
         )
         .col_vals_between(
             columns=f"{prefix}_IPAQ_MOD_MINS", 
             left=0,
             right=180, # total mins per category is capped at 180 mins
             segments=(f"{prefix}_IPAQ_MOD_W", 1),
+            na_pass=True
+        )
+        .col_vals_null(
+            columns=[f"{prefix}_IPAQ_MOD_D", f"{prefix}_IPAQ_MOD_HPD", f"{prefix}_IPAQ_MOD_MPD"], 
+            segments=(f"{prefix}_IPAQ_MOD_W", 0)
         )
         .col_vals_eq(
-            columns=[f"{prefix}_IPAQ_MOD_D", f"{prefix}_IPAQ_MOD_HPD", f"{prefix}_IPAQ_MOD_MPD", f"{prefix}_IPAQ_MOD_MINS", f"{prefix}_IPAQ_MOD_MET"], 
+            columns=[f"{prefix}_IPAQ_MOD_MINS", f"{prefix}_IPAQ_MOD_MET"], 
             value=0,
             segments=(f"{prefix}_IPAQ_MOD_W", 0)
         )
@@ -221,27 +237,35 @@ def validate_ipaq(
             left=1,
             right=7,
             segments=(f"{prefix}_IPAQ_WALK_W", 1),
+            na_pass=True
         )
         .col_vals_between(
             columns=f"{prefix}_IPAQ_WALK_HPD", 
             left=0,
             right=18, # unrealistic to do more than 18 hours of exercise per day (even that is a stretch!!)
             segments=(f"{prefix}_IPAQ_WALK_W", 1),
+            na_pass=True
         )
         .col_vals_between(
             columns=f"{prefix}_IPAQ_WALK_MPD", 
             left=0,
             right=59,
             segments=(f"{prefix}_IPAQ_WALK_W", 1),
+            na_pass=True
         )
         .col_vals_between(
             columns=f"{prefix}_IPAQ_WALK_MINS", 
             left=0,
             right=180, # total mins per category is capped at 180 mins
             segments=(f"{prefix}_IPAQ_WALK_W", 1),
+            na_pass=True
+        )
+        .col_vals_null(
+            columns=[f"{prefix}_IPAQ_WALK_D", f"{prefix}_IPAQ_WALK_HPD", f"{prefix}_IPAQ_WALK_MPD"], 
+            segments=(f"{prefix}_IPAQ_WALK_W", 0)
         )
         .col_vals_eq(
-            columns=[f"{prefix}_IPAQ_WALK_D", f"{prefix}_IPAQ_WALK_HPD", f"{prefix}_IPAQ_WALK_MPD", f"{prefix}_IPAQ_WALK_MINS", f"{prefix}_IPAQ_WALK_MET"], 
+            columns=[f"{prefix}_IPAQ_WALK_MINS", f"{prefix}_IPAQ_WALK_MET"], 
             value=0,
             segments=(f"{prefix}_IPAQ_WALK_W", 0)
         )
