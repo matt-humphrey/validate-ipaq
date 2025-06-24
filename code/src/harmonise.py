@@ -1,7 +1,4 @@
 import polars as pl
-from odyssey.core import read_sav, write_sav
-
-from config import INTERIM_DATA, PROCESSED_DATA, DATASETS
 
 # Config
 categories = ["VIG", "MOD", "WALK"]
@@ -81,6 +78,52 @@ def clean_days(prefix: str) -> list[pl.expr]:
             )
             .otherwise(None)
             .alias(days)
+        )
+
+        expressions.append(exp)
+        
+    return expressions
+
+def clean_hpd(prefix: str) -> list[pl.expr]:
+    """
+    Clean the hours per day of exercise.
+
+    Replace values of 999 with None.
+    Leave all other values the same.
+    """
+    expressions = []
+
+    for cat in categories:
+        hpd = f"{prefix}_IPAQ_{cat}_HPD"
+
+        exp = (
+            pl.when(pl.col(hpd).eq(999))
+            .then(None)
+            .otherwise(pl.col(hpd))
+            .alias(hpd)
+        )
+
+        expressions.append(exp)
+        
+    return expressions
+
+def clean_mpd(prefix: str) -> list[pl.expr]:
+    """
+    Clean the minutes per day of exercise.
+
+    Replace values of 999 with None.
+    Leave all other values the same.
+    """
+    expressions = []
+
+    for cat in categories:
+        mpd = f"{prefix}_IPAQ_{cat}_MPD"
+
+        exp = (
+            pl.when(pl.col(mpd).eq(999))
+            .then(None)
+            .otherwise(pl.col(mpd))
+            .alias(mpd)
         )
 
         expressions.append(exp)
@@ -237,6 +280,8 @@ def harmonise_ipaq(
         .with_columns(create_ipaq_activity_dummy_variable(prefix))
         .with_columns(clean_when_no_activity(prefix))
         .with_columns(clean_days(prefix))
+        .with_columns(clean_hpd(prefix))
+        .with_columns(clean_mpd(prefix))
         .with_columns(recalculate_mins(prefix))
         .with_columns(recalculate_met(prefix))
         .with_columns(recalculate_tot_met(prefix))
