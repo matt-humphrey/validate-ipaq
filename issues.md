@@ -63,6 +63,6 @@ Create a temporary binary dummy variable IPAQ_DONE, where it's 1 if there's vali
     - [ ] Several instances for VIG, MOD and WALK - HPD and MPD (HPD > 18, MPD >= 60)
     - [ ] One instance of VIG_MPD = 1 when VIG_W = None
 - [ ] G126
-    
+    - [ ] Several instances for VIG, MOD and WALK - HPD and MPD (HPD > 18, MPD >= 60)
 
 - [ ] G217
