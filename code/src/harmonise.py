@@ -287,6 +287,7 @@ def harmonise_ipaq(
         .with_columns(recalculate_tot_met(prefix))
         .with_columns(clean_when_weekly_activity_is_0(prefix))
         .with_columns(recalculate_ipaq_cat(prefix))
+        .drop("IPAQ_ACTIVITY")
     )
 
     return harmonised_df
