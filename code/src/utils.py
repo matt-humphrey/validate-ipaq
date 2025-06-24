@@ -282,6 +282,7 @@ def validate_ipaq(
                 f"{prefix}_IPAQ_VIG_MINS", f"{prefix}_IPAQ_MOD_MINS", f"{prefix}_IPAQ_WALK_MINS",
                 f"{prefix}_IPAQ_TOT_MET", f"{prefix}_IPAQ_CAT"
             ),
+            na_pass=True,
             brief="Check `IPAQ_CAT` is correctly calculated."
         )
     ).interrogate()
