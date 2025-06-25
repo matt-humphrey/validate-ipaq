@@ -44,16 +44,22 @@ def check_met(
     return preprocessor
 
 def check_tot_met(
-    met_columns: list[str],
-    tot_met_column: str
+    vig_met: str,
+    mod_met: str,
+    walk_met: str,
+    tot_met: str
     ) -> Callable:
     """Returns a preprocessing function to verify the calculated total MET value."""
     def preprocessor(df: pl.DataFrame) -> pl.DataFrame:
-        expr = sum(pl.col(col).fill_null(0) for col in met_columns)
+        expr = (
+            pl.when(pl.col(vig_met).is_null() | pl.col(mod_met).is_null() | pl.col(walk_met).is_null())
+            .then(None)
+            .otherwise(sum([pl.col(vig_met), pl.col(mod_met), pl.col(walk_met)]))
+        )
         
         return df.with_columns(
             expr.alias("check"),
-            pl.col(tot_met_column).fill_null(0) # Fill nulls with 0; otherwise the validation skips if one value in a comparison is null
+            pl.col(tot_met)
         )
     return preprocessor
 
@@ -162,7 +168,7 @@ def validate_ipaq(
         .col_vals_eq(
             columns=f"{prefix}_IPAQ_TOT_MET",
             value=pb.col("check"),
-            pre=check_tot_met([f"{prefix}_IPAQ_VIG_MET", f"{prefix}_IPAQ_MOD_MET", f"{prefix}_IPAQ_WALK_MET"], f"{prefix}_IPAQ_TOT_MET"),
+            pre=check_tot_met(f"{prefix}_IPAQ_VIG_MET", f"{prefix}_IPAQ_MOD_MET", f"{prefix}_IPAQ_WALK_MET", f"{prefix}_IPAQ_TOT_MET"),
             brief="Check `TOT_MET` equals the sum of `VIG_MET`, `MOD_MET`, and `WALK_MET`"
         )
         .col_vals_between(
