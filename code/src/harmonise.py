@@ -185,7 +185,7 @@ def recalculate_met(prefix: str) -> list[pl.expr]:
 
     return expressions
 
-def recalculate_tot_met(prefix: str) -> list[pl.expr]:
+def recalculate_tot_met(prefix: str) -> pl.expr:
     """
     Calculate TOT_MET column.
     
@@ -199,7 +199,7 @@ def recalculate_tot_met(prefix: str) -> list[pl.expr]:
         .alias(f"{prefix}_IPAQ_TOT_MET")
     )
 
-def recalculate_ipaq_cat(prefix: str) -> list[pl.expr]:
+def recalculate_ipaq_cat(prefix: str) -> pl.expr:
     """
     Calculate the IPAQ category based on the criteria from TODO: insert document.
 
@@ -265,6 +265,40 @@ def clean_when_weekly_activity_is_0(prefix: str) -> list[pl.expr]:
         for col in cols_to_zero:
             expressions.append(pl.when(pl.col(weekly_activity) == 0).then(0).otherwise(pl.col(col)).alias(col))
     
+    return expressions
+
+def clean_sit_variables(prefix: str) -> list[pl.expr]:
+    """
+    Replace values of 999 with None (for G222).
+    """
+    expressions = []
+
+    cols_to_clean = [f"{prefix}_IPAQ_SIT_{time}_{var}" for time in ["WD", "WE"] for var in ["HPD", "MPD"]]
+
+    for col in cols_to_clean:
+        expressions.append(pl.when(pl.col(col).eq(999)).then(None).otherwise(pl.col(col)).alias(col))
+
+    return expressions
+
+def recalculate_sit_trunc(prefix: str) -> list[pl.expr]:
+    """
+    Recalculate the SIT_TRUNC values (for G222 and G126).
+    """
+    expressions = []
+
+    for time_of_week in ["WD", "WE"]:
+        hpd = f"{prefix}_IPAQ_SIT_{time_of_week}_HPD"
+        mpd = f"{prefix}_IPAQ_SIT_{time_of_week}_MPD"
+        trunc = f"{prefix}_IPAQ_SIT_{time_of_week}_TRUNC"
+
+        exp = (
+            pl.when(pl.col(hpd).is_null() & pl.col(mpd).is_null())
+            .then(None)
+            .otherwise(pl.min_horizontal(960, pl.col(hpd).fill_null(0) * 60 + pl.col(mpd).fill_null(0)))
+            .alias(trunc)
+        )
+        expressions.append(exp)
+
     return expressions
 
 def harmonise_ipaq(
