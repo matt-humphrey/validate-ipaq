@@ -95,9 +95,15 @@ def check_ipaq_cat(
             ).then(2)
             .when(
                 (pl.col(vig_d).ge(3) & pl.col(vig_m).ge(20)) |
-                (sum(pl.col(col).fill_null(0) for col in [mod_d, walk_d]).ge(5) &
-                 sum(pl.col(col).fill_null(0) for col in [mod_m, walk_m]).ge(30)) |
-                (sum(pl.col(col).fill_null(0) for col in [vig_d, mod_d, walk_d]).ge(5) & pl.col(tot_met).ge(600))
+                (sum(pl.col(col).fill_null(0) for col in [vig_d, mod_d, walk_d]).ge(5) & pl.col(tot_met).ge(600)) |
+                (
+                    (pl.col(mod_d).ge(5) & pl.col(mod_m).ge(30)) |
+                    (pl.col(walk_d).ge(5) & pl.col(walk_m).ge(30)) |
+                    (
+                        sum(pl.col(col).fill_null(0) for col in [mod_d, walk_d]).ge(5) &
+                        pl.col(mod_m).ge(30) & pl.col(walk_m).ge(30)
+                    )
+                )
             ).then(1)
             .when(pl.col(tot_met).is_null()).then(None) # Don't impute 0 if data is missing
             .otherwise(0)

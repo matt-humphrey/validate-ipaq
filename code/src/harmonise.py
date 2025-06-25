@@ -204,7 +204,7 @@ def recalculate_ipaq_cat(prefix: str) -> pl.expr:
     Calculate the IPAQ category based on the criteria from TODO: insert document.
 
     HIGH: 2
-    Vigorous exercise on 3+ days for 20+ mins AND >= 1500 MET mins per week
+    Vigorous exercise on 3+ days AND >= 1500 MET mins per week (doesn't explicitly state that vig exercise must be 20+ mins)
     OR combination of any exercise on 7+ days AND >= 3000 MET mins per week
 
     MODERATE: 1
@@ -215,10 +215,9 @@ def recalculate_ipaq_cat(prefix: str) -> pl.expr:
     LOW: 0
     None of the above criteria
 
-    Assuming that by 'combination of any exercise on x+ days', that means
-    two types of exercise on the same day technically counts as 2 days.
-    Otherwise it's impossible to know, based on the data, across which days the participant exercised.
-    (For instance, 3 x VIG, 3 x MOD, 3 x WALK could be across as few as 3, or as many as 7 days).
+    A combination of exercise on multiple days means that multiple types of exercise 
+    on a single day are counted separately (ie. 30 mins of moderate exercise and 30 mins
+    of walking would be considered two days).
     """
     vig_days = f"{prefix}_IPAQ_VIG_D"
     mod_days = f"{prefix}_IPAQ_MOD_D"
@@ -232,14 +231,17 @@ def recalculate_ipaq_cat(prefix: str) -> pl.expr:
         pl.when(pl.col("IPAQ_ACTIVITY").eq(0) | pl.col(tot_met).is_null())
         .then(None)
         .when(
-            (pl.col(vig_days).ge(3) & pl.col(vig_mins).ge(20) & pl.col(tot_met).ge(1500)) | 
+            (pl.col(vig_days).ge(3) & pl.col(tot_met).ge(1500)) | # if vig mins must be 20+ mins, include '& pl.col(vig_mins).ge(20)'
             (sum(pl.col(col).fill_null(0) for col in [vig_days, mod_days, walk_days]).ge(7) & pl.col(tot_met).ge(3000))
         ).then(2)
         .when(
             (pl.col(vig_days).ge(3) & pl.col(vig_mins).ge(20)) |
-            (sum(pl.col(col).fill_null(0) for col in [mod_days, walk_days]).ge(5) &
-                sum(pl.col(col).fill_null(0) for col in [mod_mins, walk_mins]).ge(30)) |
-            (sum(pl.col(col).fill_null(0) for col in [vig_days, mod_days, walk_days]).ge(5) & pl.col(tot_met).ge(600))
+            (sum(pl.col(col).fill_null(0) for col in [vig_days, mod_days, walk_days]).ge(5) & pl.col(tot_met).ge(600)) |
+            ((pl.col(mod_days).ge(5) & pl.col(mod_mins).ge(30)) |
+             (pl.col(walk_days).ge(5) & pl.col(walk_mins).ge(30)) |
+             (sum(pl.col(col).fill_null(0) for col in [mod_days, walk_days]).ge(5) &
+              pl.col(mod_mins).ge(30) & pl.col(walk_mins).ge(30))
+            )
         ).then(1)
         .otherwise(0)
         .alias(f"{prefix}_IPAQ_CAT")
