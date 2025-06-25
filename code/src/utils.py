@@ -1,6 +1,17 @@
 from typing import Callable
 import polars as pl
 import pointblank as pb
+from odyssey.core import Dataset
+from pathlib import Path
+
+type Metadata = dict[str, str|int|dict[int|float, str]]
+type MetadataDict = dict[str, Metadata]
+
+def read_sav(file: str, directory: Path) -> tuple[pl.DataFrame, MetadataDict]:
+    data = Dataset(file, directory)
+    lf, meta = data.load_data()
+    df = lf.collect()
+    return df, meta
 
 def check_total_mins(
     hpd_column: str,
@@ -288,3 +299,63 @@ def validate_ipaq(
     ).interrogate()
 
     return validation
+
+
+def check_sit_trunc(
+    hpd: str,
+    mpd: str,
+    # sit_trunc: str
+    ) -> Callable:
+    """
+    Returns a preprocessing function to verify the calculated total SIT time.
+    
+    SIT_TRUNC should equal HPD * 60 + MPD, with a maximum value of 960 mins.
+    If both HPD and MPD are Null, SIT_TRUNC should be Null.
+    """
+    def preprocessor(df: pl.DataFrame) -> pl.DataFrame:
+        expr = (
+            pl.when(pl.col(hpd).is_null() & pl.col(mpd).is_null())
+            .then(None)
+            .otherwise(pl.min_horizontal(960, pl.col(hpd).fill_null(0) * 60 + pl.col(mpd).fill_null(0)))
+        )
+        
+        return df.with_columns(
+            expr.alias("check"),
+            # pl.col(sit_trunc).fill_null(0) # Fill nulls with 0; otherwise the validation skips if one value in a comparison is null
+        )
+    return preprocessor
+
+def validate_sitting(
+    prefix: str, # prefix for the dataset
+    df: pl.DataFrame,
+    sit_weekday: bool = True,
+    sit_weekend: bool = True,
+    ) -> pb.Validate:
+
+    validation = pb.Validate(data=df)
+
+    if sit_weekday:
+        validation = (
+            validation
+            .col_vals_eq(
+                columns=f"{prefix}_IPAQ_SIT_WD_TRUNC",
+                value=pb.col("check"),
+                pre=check_sit_trunc(f"{prefix}_IPAQ_SIT_WD_HPD", f"{prefix}_IPAQ_SIT_WD_MPD"),
+                brief="Check total mins/day equals `HPD*60 + MPD`",
+                na_pass=True,
+            )
+        )
+
+    if sit_weekend:
+        validation = (
+            validation
+            .col_vals_eq(
+                columns=f"{prefix}_IPAQ_SIT_WE_TRUNC",
+                value=pb.col("check"),
+                pre=check_sit_trunc(f"{prefix}_IPAQ_SIT_WE_HPD", f"{prefix}_IPAQ_SIT_WE_MPD"),
+                brief="Check total mins/day equals `HPD*60 + MPD`",
+                na_pass=True,
+            )
+        )
+
+    return validation.interrogate()

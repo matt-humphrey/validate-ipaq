@@ -1,21 +1,29 @@
-import polars as pl
-import pointblank as pb
 import odyssey.core as od
 
-from utils import validate_ipaq
-from config import DATASETS, RAW_DATA, INTERIM_DATA, PROCESSED_DATA
-
-type Metadata = dict[str, str|int|dict[int|float, str]]
-type MetadataDict = dict[str, Metadata]
+from utils import read_data
+from harmonise import harmonise_ipaq, clean_sit_variables, recalculate_sit_trunc
+from config import DATASETS, INTERIM_DATA, PROCESSED_DATA
 
 def main():
-    prefix = "G220"
-    g220 = od.Dataset("G220_Q.sav", INTERIM_DATA)
-    lf, _meta = g220.load_data()
-    df = lf.collect()
+    for dset in DATASETS:
+        # Handle G217 separately, as it's a different format to the rest
+        if dset == "G217":
+            pass
+        else:
+            file = DATASETS[dset]["file"]
+            df, meta = read_data(file, INTERIM_DATA)
+            harmonised_df = harmonise_ipaq(dset, df)
 
-    validate_ipaq(prefix, df).get_tabular_report().write_raw_html("table.html")
-    
+        # Additional cleaning required for G222 and G126 for SIT variables
+        if dset in ["G222", "G126"]:
+            harmonised_df = (
+                harmonised_df
+                .with_columns(clean_sit_variables(dset))
+                .with_columns(recalculate_sit_trunc(dset))
+            )
+
+        harmonised_lf = harmonised_df.lazy()
+        od.write_sav(PROCESSED_DATA/file, harmonised_lf, meta)
 
 if __name__ == "__main__":
     main()
