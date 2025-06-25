@@ -58,12 +58,12 @@ def check_tot_met(
     return preprocessor
 
 def check_ipaq_cat(
-    vig_d: str, # days of vigorous exercise per week
-    mod_d: str,
-    walk_d: str,
-    vig_m: str, # mins of vigorous exercise per day
-    mod_m: str,
-    walk_m: str,
+    vig_days: str, # days of vigorous exercise per week
+    mod_days: str,
+    walk_days: str,
+    vig_mins: str, # mins of vigorous exercise per day
+    mod_mins: str,
+    walk_mins: str,
     tot_met: str, # total MET minutes per week
     cat: str # IPAQ category (low: 0, moderate: 1, high: 2)
     ) -> Callable:
@@ -90,18 +90,18 @@ def check_ipaq_cat(
     def preprocessor(df: pl.DataFrame) -> pl.DataFrame:
         return df.with_columns(
             (pl.when(
-                (pl.col(vig_d).ge(3) & pl.col(vig_m).ge(20) & pl.col(tot_met).ge(1500)) | 
-                (sum(pl.col(col).fill_null(0) for col in [vig_d, mod_d, walk_d]).ge(7) & pl.col(tot_met).ge(3000))
+                (pl.col(vig_days).ge(3) & pl.col(vig_mins).ge(20) & pl.col(tot_met).ge(1500)) | 
+                (sum(pl.col(col).fill_null(0) for col in [vig_days, mod_days, walk_days]).ge(7) & pl.col(tot_met).ge(3000))
             ).then(2)
             .when(
-                (pl.col(vig_d).ge(3) & pl.col(vig_m).ge(20)) |
-                (sum(pl.col(col).fill_null(0) for col in [vig_d, mod_d, walk_d]).ge(5) & pl.col(tot_met).ge(600)) |
+                (pl.col(vig_days).ge(3) & pl.col(vig_mins).ge(20)) |
+                (sum(pl.col(col).fill_null(0) for col in [vig_days, mod_days, walk_days]).ge(5) & pl.col(tot_met).ge(600)) |
                 (
-                    (pl.col(mod_d).ge(5) & pl.col(mod_m).ge(30)) |
-                    (pl.col(walk_d).ge(5) & pl.col(walk_m).ge(30)) |
+                    (pl.col(mod_days).ge(5) & pl.col(mod_mins).ge(30)) |
+                    (pl.col(walk_days).ge(5) & pl.col(walk_mins).ge(30)) |
                     (
-                        sum(pl.col(col).fill_null(0) for col in [mod_d, walk_d]).ge(5) &
-                        pl.col(mod_m).ge(30) & pl.col(walk_m).ge(30)
+                        sum(pl.col(col).fill_null(0) for col in [mod_days, walk_days]).ge(5) &
+                        pl.col(mod_mins).ge(30) & pl.col(walk_mins).ge(30)
                     )
                 )
             ).then(1)
