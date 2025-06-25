@@ -95,23 +95,20 @@ def check_ipaq_cat(
     """
     def preprocessor(df: pl.DataFrame) -> pl.DataFrame:
         return df.with_columns(
-            (pl.when(
+            (pl.when(pl.col(tot_met).is_null()).then(None)
+            .when(
                 (pl.col(vig_days).ge(3) & pl.col(vig_mins).ge(20) & pl.col(tot_met).ge(1500)) | 
                 (sum(pl.col(col).fill_null(0) for col in [vig_days, mod_days, walk_days]).ge(7) & pl.col(tot_met).ge(3000))
             ).then(2)
             .when(
                 (pl.col(vig_days).ge(3) & pl.col(vig_mins).ge(20)) |
                 (sum(pl.col(col).fill_null(0) for col in [vig_days, mod_days, walk_days]).ge(5) & pl.col(tot_met).ge(600)) |
-                (
-                    (pl.col(mod_days).ge(5) & pl.col(mod_mins).ge(30)) |
+                ((pl.col(mod_days).ge(5) & pl.col(mod_mins).ge(30)) |
                     (pl.col(walk_days).ge(5) & pl.col(walk_mins).ge(30)) |
-                    (
-                        sum(pl.col(col).fill_null(0) for col in [mod_days, walk_days]).ge(5) &
-                        pl.col(mod_mins).ge(30) & pl.col(walk_mins).ge(30)
-                    )
-                )
+                    (sum(pl.col(col).fill_null(0) for col in [mod_days, walk_days]).ge(5) &
+                        pl.col(mod_mins).ge(30) & pl.col(walk_mins).ge(30)))
             ).then(1)
-            .when(pl.col(tot_met).is_null()).then(None) # Don't impute 0 if data is missing
+            .when(pl.col(tot_met).is_null()).then(None)
             .otherwise(0)
             ).alias("check"),
             pl.col(cat).fill_null(0) # Fill nulls with 0; otherwise the validation skips if one value in a comparison is null
