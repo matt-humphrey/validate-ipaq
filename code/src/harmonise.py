@@ -301,7 +301,13 @@ def clean_when_weekly_activity_is_0(prefix: str) -> list[pl.expr]:
         cols_to_zero = [f"{prefix}_IPAQ_{cat}_{col}" for col in ["MINS", "MET"]]
         
         for col in cols_to_null:
-            expressions.append(pl.when(pl.col(weekly_activity).eq(0)).then(None).otherwise(pl.col(col)).alias(col))
+            exp = (
+                pl.when(pl.col(weekly_activity).eq(0) | pl.col(weekly_activity).is_null())
+                .then(None)
+                .otherwise(pl.col(col))
+                .alias(col)
+            )
+            expressions.append(exp)
         
         for col in cols_to_zero:
             expressions.append(pl.when(pl.col(weekly_activity).eq(0)).then(0).otherwise(pl.col(col)).alias(col))
