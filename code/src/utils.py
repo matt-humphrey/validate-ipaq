@@ -183,6 +183,11 @@ def validate_ipaq(
             segments=(f"{prefix}_IPAQ_VIG_W", 1),
             na_pass=True
         )
+        .col_vals_expr(
+            expr=pl.col(f"{prefix}_IPAQ_VIG_HPD") % 1 == 0,
+            brief="Check HPD is a whole number.",
+            pre=lambda df: df.with_columns(pl.col(f"{prefix}_IPAQ_VIG_HPD").fill_null(0))
+        )
         .col_vals_between(
             columns=f"{prefix}_IPAQ_VIG_MPD", 
             left=0,
@@ -225,6 +230,11 @@ def validate_ipaq(
             segments=(f"{prefix}_IPAQ_MOD_W", 1),
             na_pass=True
         )
+        .col_vals_expr(
+            expr=pl.col(f"{prefix}_IPAQ_MOD_HPD") % 1 == 0,
+            brief="Check HPD is a whole number.",
+            pre=lambda df: df.with_columns(pl.col(f"{prefix}_IPAQ_MOD_HPD").fill_null(0))
+        )
         .col_vals_between(
             columns=f"{prefix}_IPAQ_MOD_MPD", 
             left=0,
@@ -266,6 +276,11 @@ def validate_ipaq(
             right=18, # unrealistic to do more than 18 hours of exercise per day (even that is a stretch!!)
             segments=(f"{prefix}_IPAQ_WALK_W", 1),
             na_pass=True
+        )
+        .col_vals_expr(
+            expr=pl.col(f"{prefix}_IPAQ_WALK_HPD") % 1 == 0,
+            brief="Check HPD is a whole number.",
+            pre=lambda df: df.with_columns(pl.col(f"{prefix}_IPAQ_WALK_HPD").fill_null(0))
         )
         .col_vals_between(
             columns=f"{prefix}_IPAQ_WALK_MPD", 
