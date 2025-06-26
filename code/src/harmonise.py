@@ -89,21 +89,46 @@ def clean_hpd(prefix: str) -> list[pl.expr]:
     Clean the hours per day of exercise.
 
     Replace values of 999 with None.
-    Leave all other values the same.
+    
+    In cases where hours is greater than 18, check if it's likely a manual input error
+    and should be converted into minutes.
     """
     expressions = []
 
     for cat in categories:
         hpd = f"{prefix}_IPAQ_{cat}_HPD"
+        mpd = f"{prefix}_IPAQ_{cat}_MPD"
 
-        exp = (
+        exp1 = (
             pl.when(pl.col(hpd).eq(999))
             .then(None)
             .otherwise(pl.col(hpd))
             .alias(hpd)
         )
 
-        expressions.append(exp)
+        exp2 = (
+            pl.when(
+                (pl.col(hpd) > 18) & 
+                (pl.col(hpd) % 5 == 0) & 
+                (pl.col(mpd).is_null() | (pl.col(mpd) == 0))
+            )
+            .then(0)
+            .otherwise(None)
+            .alias(hpd)
+        )
+        
+        exp3 = (
+            pl.when(
+                (pl.col(hpd) > 18) & 
+                (pl.col(hpd) % 5 == 0) & 
+                (pl.col(mpd).is_null() | (pl.col(mpd) == 0))
+            )
+            .then(pl.col(hpd))
+            .otherwise(pl.col(mpd))
+            .alias(mpd)
+        )
+
+        expressions.append([exp1, exp2, exp3])
         
     return expressions
 
