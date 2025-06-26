@@ -54,15 +54,17 @@ Create a temporary binary dummy variable IPAQ_DONE, where it's 1 if there's vali
 => If IPAQ_DONE is 0, ALL exercise-related variables should be None
 
 - [x] G220
-- [ ] G222
-    - [ ] One instance of `G222_IPAQ_WALK_HPD` = 20
-- [ ] G227
-    - [ ] Several instances for VIG, MOD and WALK - HPD and MPD (HPD > 18, MPD >= 60)
-    - [ ] One instance of WALK_HPD = 1 when WALK_W = None
-- [ ] G228
-    - [ ] Several instances for VIG, MOD and WALK - HPD and MPD (HPD > 18, MPD >= 60)
-    - [ ] One instance of VIG_MPD = 1 when VIG_W = None
-- [ ] G126
-    - [ ] Several instances for VIG, MOD and WALK - HPD and MPD (HPD > 18, MPD >= 60)
+- [x] G222
+    - [x] One instance of `G222_IPAQ_WALK_HPD` = 20
+    - [x] Values of 999 for SIT_HPD and SIT_MPD, and values of 9999 for SIT_TRUNC
+- [x] G227
+    - [x] Several instances for VIG, MOD and WALK - HPD and MPD (HPD > 18, MPD >= 60)
+    - [x] One instance of WALK_HPD = 1 when WALK_W = None
+- [x] G228
+    - [x] Several instances for VIG, MOD and WALK - HPD and MPD (HPD > 18, MPD >= 60)
+    - [x] One instance of VIG_MPD = 1 when VIG_W = None
+- [x] G126
+    - [x] Several instances for VIG, MOD and WALK - HPD and MPD (HPD > 18, MPD >= 60)
+    - [x] Some values of SIT_TRUNC have been doubled
 
 - [ ] G217
