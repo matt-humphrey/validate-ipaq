@@ -97,7 +97,7 @@ def check_ipaq_cat(
         return df.with_columns(
             (pl.when(pl.col(tot_met).is_null()).then(None)
             .when(
-                (pl.col(vig_days).ge(3) & pl.col(vig_mins).ge(20) & pl.col(tot_met).ge(1500)) | 
+                (pl.col(vig_days).ge(3) & pl.col(vig_mins).ge(10) & pl.col(tot_met).ge(1500)) | 
                 (sum(pl.col(col).fill_null(0) for col in [vig_days, mod_days, walk_days]).ge(7) & pl.col(tot_met).ge(3000))
             ).then(2)
             .when(
@@ -166,7 +166,8 @@ def validate_ipaq(
             columns=f"{prefix}_IPAQ_TOT_MET",
             value=pb.col("check"),
             pre=check_tot_met(f"{prefix}_IPAQ_VIG_MET", f"{prefix}_IPAQ_MOD_MET", f"{prefix}_IPAQ_WALK_MET", f"{prefix}_IPAQ_TOT_MET"),
-            brief="Check `TOT_MET` equals the sum of `VIG_MET`, `MOD_MET`, and `WALK_MET`"
+            brief="Check `TOT_MET` equals the sum of `VIG_MET`, `MOD_MET`, and `WALK_MET`",
+            na_pass=True
         )
         .col_vals_between(
             columns=f"{prefix}_IPAQ_VIG_D",

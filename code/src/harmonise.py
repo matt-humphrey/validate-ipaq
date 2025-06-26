@@ -89,8 +89,8 @@ def clean_hpd(prefix: str) -> list[pl.expr]:
     Clean the hours per day of exercise.
 
     Replace values of 999 with None.
-    
-    In cases where hours is greater than 18, check if it's likely a manual input error
+
+    In cases where hours is greater than 16, check if it's likely a manual input error
     and should be converted into minutes.
     """
     expressions = []
@@ -100,35 +100,29 @@ def clean_hpd(prefix: str) -> list[pl.expr]:
         mpd = f"{prefix}_IPAQ_{cat}_MPD"
 
         exp1 = (
-            pl.when(pl.col(hpd).eq(999))
-            .then(None)
-            .otherwise(pl.col(hpd))
-            .alias(hpd)
-        )
-
-        exp2 = (
-            pl.when(
-                (pl.col(hpd) > 18) & 
+            pl.when(pl.col(hpd).le(16)) # This will automatically capture values of 999 and convert to None
+            .then(pl.col(hpd))
+            .when(
                 (pl.col(hpd) % 5 == 0) & 
-                (pl.col(mpd).is_null() | (pl.col(mpd) == 0))
+                (pl.col(mpd).is_null() | (pl.col(mpd).eq(0)))
             )
             .then(0)
             .otherwise(None)
             .alias(hpd)
         )
         
-        exp3 = (
+        exp2 = (
             pl.when(
-                (pl.col(hpd) > 18) & 
+                pl.col(hpd).is_between(20, 60) & 
                 (pl.col(hpd) % 5 == 0) & 
-                (pl.col(mpd).is_null() | (pl.col(mpd) == 0))
+                (pl.col(mpd).is_null() | (pl.col(mpd).eq(0)))
             )
             .then(pl.col(hpd))
             .otherwise(pl.col(mpd))
             .alias(mpd)
         )
 
-        expressions.append([exp1, exp2, exp3])
+        expressions.extend([exp1, exp2])
         
     return expressions
 
@@ -137,22 +131,42 @@ def clean_mpd(prefix: str) -> list[pl.expr]:
     Clean the minutes per day of exercise.
 
     Replace values of 999 with None.
-    Leave all other values the same.
+
+    In cases where hours is greater than 16, check if it's likely a manual input error
+    and should be converted into minutes.
     """
     expressions = []
 
     for cat in categories:
+        hpd = f"{prefix}_IPAQ_{cat}_HPD"
         mpd = f"{prefix}_IPAQ_{cat}_MPD"
 
-        exp = (
-            pl.when(pl.col(mpd).eq(999))
-            .then(None)
-            .otherwise(pl.col(mpd))
+        exp1 = (
+            pl.when(pl.col(mpd).is_between(10, 60, closed='left')) # This will automatically capture values of 999 and convert to None
+            .then(pl.col(mpd))
+            .when(
+                (pl.col(mpd) % 5 == 0) & 
+                (pl.col(mpd).ge(10)) &      # trim values less than 10 mins
+                (pl.col(hpd).is_null() | (pl.col(hpd).eq(0)))
+            )
+            .then(pl.col(mpd) % 60)   # ie. 90 mins -> 90 % 60 = 30 (mins)
+            .otherwise(None)
             .alias(mpd)
         )
-
-        expressions.append(exp)
         
+        exp2 = (
+            pl.when(
+                pl.col(mpd).ge(60) & 
+                (pl.col(mpd) % 5 == 0) & 
+                (pl.col(hpd).is_null() | (pl.col(hpd).eq(0)))
+            )
+            .then(pl.col(mpd) // 60)   # ie. 90 mins -> 90 // 60 = 1 (hour)
+            .otherwise(pl.col(hpd))
+            .alias(hpd)
+        )
+
+        expressions.extend([exp1, exp2])
+
     return expressions
 
 def recalculate_mins(prefix: str) -> list[pl.expr]:
@@ -256,7 +270,7 @@ def recalculate_ipaq_cat(prefix: str) -> pl.expr:
         pl.when(pl.col("IPAQ_ACTIVITY").eq(0) | pl.col(tot_met).is_null())
         .then(None)
         .when(
-            (pl.col(vig_days).ge(3) & pl.col(tot_met).ge(1500)) | # if vig mins must be 20+ mins, include '& pl.col(vig_mins).ge(20)'
+            (pl.col(vig_days).ge(3) & pl.col(vig_mins).ge(10) & pl.col(tot_met).ge(1500)) |
             (sum(pl.col(col).fill_null(0) for col in [vig_days, mod_days, walk_days]).ge(7) & pl.col(tot_met).ge(3000))
         ).then(2)
         .when(
@@ -287,10 +301,10 @@ def clean_when_weekly_activity_is_0(prefix: str) -> list[pl.expr]:
         cols_to_zero = [f"{prefix}_IPAQ_{cat}_{col}" for col in ["MINS", "MET"]]
         
         for col in cols_to_null:
-            expressions.append(pl.when(pl.col(weekly_activity) == 0).then(None).otherwise(pl.col(col)).alias(col))
+            expressions.append(pl.when(pl.col(weekly_activity).eq(0)).then(None).otherwise(pl.col(col)).alias(col))
         
         for col in cols_to_zero:
-            expressions.append(pl.when(pl.col(weekly_activity) == 0).then(0).otherwise(pl.col(col)).alias(col))
+            expressions.append(pl.when(pl.col(weekly_activity).eq(0)).then(0).otherwise(pl.col(col)).alias(col))
     
     return expressions
 
