@@ -2,7 +2,7 @@ import odyssey.core as od
 
 from utils import read_data
 from harmonise import harmonise_ipaq, clean_sit_variables, recalculate_sit_trunc
-from config import DATASETS, INTERIM_DATA, PROCESSED_DATA
+from config import DATASETS, INTERIM_DATA, PROCESSED_DATA, METADATA
 
 def main():
     for dset in DATASETS:
@@ -23,7 +23,12 @@ def main():
             )
 
         harmonised_lf = harmonised_df.lazy()
-        od.write_sav(PROCESSED_DATA/file, harmonised_lf, meta)
+
+        new_meta = od.zip_cols_to_metadata(harmonised_lf, METADATA)
+        converted_meta = od.convert_metadata_to_dict(new_meta)
+        harmonised_meta = od.merge_dictionaries([converted_meta, meta])
+
+        od.write_sav(PROCESSED_DATA/file, harmonised_lf, harmonised_meta)
 
 if __name__ == "__main__":
     main()
