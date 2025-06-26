@@ -7,7 +7,7 @@ from pathlib import Path
 type Metadata = dict[str, str|int|dict[int|float, str]]
 type MetadataDict = dict[str, Metadata]
 
-def read_sav(file: str, directory: Path) -> tuple[pl.DataFrame, MetadataDict]:
+def read_data(file: str, directory: Path) -> tuple[pl.DataFrame, MetadataDict]:
     data = Dataset(file, directory)
     lf, meta = data.load_data()
     df = lf.collect()
