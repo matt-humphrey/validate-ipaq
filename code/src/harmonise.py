@@ -101,7 +101,12 @@ def clean_hpd(prefix: str) -> list[pl.expr]:
 
         exp1 = (
             pl.when(
-                pl.col(hpd).le(16) & # This will automatically capture values of 999 and convert to None
+                (pl.col(hpd) % 1 != 0) & # If HPD is a float (ie. 1.5 hours), truncate to 1 hour
+                (pl.col(mpd).is_null() | (pl.col(mpd).eq(0)))
+            )
+            .then(pl.col(hpd) // 1) # ie. 1.5 // 1 = 1 hour
+            .when(
+                (pl.col(hpd).le(16)) & # This will automatically capture values of 999 and convert to None
                 (pl.col(hpd) % 1 == 0) # HPD is a whole number
             )
             .then(pl.col(hpd))
@@ -110,27 +115,22 @@ def clean_hpd(prefix: str) -> list[pl.expr]:
                 (pl.col(mpd).is_null() | (pl.col(mpd).eq(0))) # Ensure no existing minutes column, or convert hours to None
             )
             .then(0)
-            .when(
-                (pl.col(hpd) % 1 != 0) & # If HPD is a float (ie. 1.5 hours), truncate to 1 hour
-                (pl.col(mpd).is_null() | (pl.col(mpd).eq(0)))
-            ) 
-            .then(pl.col(hpd) // 1) # ie. 1.5 // 1 = 1 hour
             .otherwise(None)
             .alias(hpd)
         )
         
         exp2 = (
             pl.when(
-                pl.col(hpd).is_between(20, 60) & 
+                (pl.col(hpd) % 1 != 0) & # If HPD is a float (ie. 1.5 hours), convert the decimal to minutes
+                (pl.col(mpd).is_null() | (pl.col(mpd).eq(0)))
+            ) 
+            .then(pl.col(hpd) % 1 * 60) # ie. 1.5 % 1 = 0.5 -> 0.5 * 60 = 30 minutes
+            .when(
+                (pl.col(hpd).is_between(20, 60)) & 
                 (pl.col(hpd) % 5 == 0) & 
                 (pl.col(mpd).is_null() | (pl.col(mpd).eq(0)))
             )
             .then(pl.col(hpd))
-            .when(
-                (pl.col(hpd) % 1 != 0) # If HPD is a float (ie. 1.5 hours), convert the decimal to minutes
-                (pl.col(mpd).is_null() | (pl.col(mpd).eq(0)))
-            ) 
-            .then(pl.col(hpd) % 1 * 60) # ie. 1.5 % 1 = 0.5 -> 0.5 * 60 = 30 minutes
             .otherwise(pl.col(mpd))
             .alias(mpd)
         )
