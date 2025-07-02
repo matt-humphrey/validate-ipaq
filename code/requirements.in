@@ -7,4 +7,7 @@ rich==13.9.4
 ipython==9.0.1
 ipykernel==6.29.5
 pointblank>=0.9.6
+selenium
+pillow
 -e C:/Users/00113294/Documents/WIP/odyssey
+-e .
