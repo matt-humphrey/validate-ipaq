@@ -1,18 +1,20 @@
-import odyssey.core as od
+from odyssey.core import write_sav
 
-from utils import read_data
+from utils import read_data, update_metadata
+from harmonise_long import harmonise_ipaq_long
 from harmonise import harmonise_ipaq, clean_sit_variables, recalculate_sit_trunc
-from config import DATASETS, INTERIM_DATA, PROCESSED_DATA, METADATA
+from config import DATASETS, INTERIM_DATA, PROCESSED_DATA, METADATA, LONG_METADATA
 
 def main():
     for dset in DATASETS:
-        # Handle G217 separately, as it's a different format to the rest
+        file = DATASETS[dset]["file"]
+        df, meta = read_data(file, INTERIM_DATA)
         if dset == "G217":
-            pass
+            harmonised_df = harmonise_ipaq_long(dset, df)
+            new_meta = LONG_METADATA
         else:
-            file = DATASETS[dset]["file"]
-            df, meta = read_data(file, INTERIM_DATA)
             harmonised_df = harmonise_ipaq(dset, df)
+            new_meta = METADATA
 
         # Additional cleaning required for G222 and G126 for SIT variables
         if dset in ["G222", "G126"]:
@@ -23,12 +25,9 @@ def main():
             )
 
         harmonised_lf = harmonised_df.lazy()
+        harmonised_meta = update_metadata(harmonised_lf, meta, new_meta)
 
-        new_meta = od.zip_cols_to_metadata(harmonised_lf, METADATA)
-        converted_meta = od.convert_metadata_to_dict(new_meta)
-        harmonised_meta = od.merge_dictionaries([converted_meta, meta])
-
-        od.write_sav(PROCESSED_DATA/file, harmonised_lf, harmonised_meta)
+        write_sav(PROCESSED_DATA/file, harmonised_lf, harmonised_meta)
 
 if __name__ == "__main__":
     main()
