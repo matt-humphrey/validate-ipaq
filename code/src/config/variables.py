@@ -46,8 +46,8 @@ DATASETS = {
             "G217_IPAQ_WK4":      "G217_IPAQ_TRANS_WALK_MPD",
             "G217_AV1":           "G217_IPAQ_HOME_OUT_VIG",
             "G217_AV2":           "G217_IPAQ_HOME_OUT_VIG_D",
-            "G217_AV3":           "G217_IPAQ_HOME_OUT_VIG_HPD",
-            "G217_AV4":           "G217_IPAQ_HOME_OUT_VIG_MPD",
+            "G217_AV3":           "G217_IPAQ_HOME_OUT_VIG_MPD",
+            "G217_AV4":           "G217_IPAQ_HOME_OUT_VIG_HPD",
             "G217_HM1":           "G217_IPAQ_HOME_OUT_MOD",
             "G217_HM7":           "G217_IPAQ_HOME_OUT_MOD_D",
             "G217_HM2":           "G217_IPAQ_HOME_OUT_MOD_HPD",
@@ -77,8 +77,6 @@ DATASETS = {
             "G217_LY3":           "G217_IPAQ_LYING_WE_HPD",
             "G217_LY4":           "G217_IPAQ_LYING_WE_MPD",
             "G217_TOT_WORK_MET":  "G217_IPAQ_TOT_WORK_MET",
-            "G217_WALK_T_MET":    "G217_IPAQ_WALK_T_MET",
-            "G217_BIKE_T_MET":    "G217_IPAQ_BIKE_T_MET",
             "G217_TOT_TRANS_MET": "G217_IPAQ_TOT_TRANS_MET",
             "G217_TOT_HOME_MET":  "G217_IPAQ_TOT_HOME_MET",
             "G217_TOT_LEIS_MET":  "G217_IPAQ_TOT_LSR_MET",
@@ -89,7 +87,7 @@ DATASETS = {
             "G217_SIT_WD_TRUNC":  "G217_IPAQ_SIT_WD_TRUNC",
             "G217_SIT_WE_TRUNC":  "G217_IPAQ_SIT_WE_TRUNC"
         },
-        "delete": []
+        "delete": ["G217_WALK_T_MET", "G217_BIKE_T_MET"] # unnecessary derived variables
     },
     "G220": {
         "file": "G220_Q.sav",
