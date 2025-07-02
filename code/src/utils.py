@@ -1,17 +1,28 @@
 from typing import Callable
 import polars as pl
 import pointblank as pb
-from odyssey.core import Dataset
+from odyssey.core import Dataset, Metadata, zip_cols_to_metadata, convert_metadata_to_dict, merge_dictionaries
 from pathlib import Path
 
-type Metadata = dict[str, str|int|dict[int|float, str]]
-type MetadataDict = dict[str, Metadata]
+type MetadataType = dict[str, str|int|dict[int|float, str]]
+type MetadataDict = dict[str, MetadataType]
 
 def read_data(file: str, directory: Path) -> tuple[pl.DataFrame, MetadataDict]:
     data = Dataset(file, directory)
     lf, meta = data.load_data()
     df = lf.collect()
     return df, meta
+
+def update_metadata(
+    lf: pl.LazyFrame, 
+    existing_metadata: MetadataDict,
+    new_metadata: list[Metadata]
+) -> MetadataDict:
+    "Use a list of manually defined Metadata to update the metadata in SPSS"
+    new_meta = zip_cols_to_metadata(lf, new_metadata)
+    converted_meta = convert_metadata_to_dict(new_meta)
+    harmonised_meta = merge_dictionaries([converted_meta, existing_metadata])
+    return harmonised_meta
 
 def check_total_mins(
     hpd_column: str,
